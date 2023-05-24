@@ -3,7 +3,7 @@
   "name": "OPNsense",
   "codeowners": ["@travisghansen"],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": ["pyopnsenseapi"],
   "documentation": "https://github.com/travisghansen/hass-opnsense",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/travisghansen/hass-opnsense/issues",

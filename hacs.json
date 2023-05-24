@@ -1,5 +1,5 @@
 {
   "name": "OPNsense integration for Home Assistant",
-  "homeassistant": "2022.4.0",
+  "homeassistant": "2023.5.0",
   "render_readme": true
 }

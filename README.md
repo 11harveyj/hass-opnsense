@@ -1,15 +1,13 @@
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Ftravisghansen%2Fhass-opnsense%2Fbadge%3Fref%3Dmain&style=for-the-badge)](https://actions-badge.atrox.dev/travisghansen/hass-opnsense/goto?ref=main)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 # hass-opnsense
 
 Join `OPNsense` with `Home Assistant`!
 
-`hass-opnsense` uses the built-in `xmlrpc` service of `OPNsense` for all
-interactions. This project is currently a proof-of-concept and may fail to work
-at any time.
+`hass-opnsense` uses the built-in APIs in `OPNsense` for all
+interactions.
 
-Initial development was done againt `OPNsense` `21.7` and `Home Assistant` `2021.10`.
+Initial development was done against `OPNsense` `23.1` and `Home Assistant` `2023.5`.
 
 # Overview
 
@@ -35,31 +33,10 @@ Initial development was done againt `OPNsense` `21.7` and `Home Assistant` `2021
 
 # Installation
 
-This integration currenlty **replaces** the built-in `OPNsense` integration
+This integration currently **replaces** the built-in `OPNsense` integration
 which only provides `device_tracker` functionality, be sure to remove any
 associated configuration for the built-in integration before installing this
 replacement.
-
-The installation requires a plugin on `OPNsense` and a custom integration in `Home Assistant`.
-
-## OPNsense_plugin
-
-To use the integration you need to install an `OPNsense` plugin made available
-on mimugmail repository: `https://www.routerperformance.net/opnsense-repo/`
-
-First you need to install the repository:
-
-- open an SSH session on `OPNsense` and issue the following commands:
-
-```
-fetch -o /usr/local/etc/pkg/repos/mimugmail.conf https://www.routerperformance.net/mimugmail.conf
-pkg update
-```
-
-Now you need to install the plugin, you have two ways to do it:
-
-- In `OPNsense` web UI, go to System:Firmware:Plugins and install plugin `os-homeassistant-maxit`
-- From SSH shell: `pkg install os-homeassistant-maxit`
 
 ## HomeAssistant_integration
 
@@ -67,7 +44,7 @@ In `Home Assistant`, add this repository to your `HACS` installation or clone th
 
 ### HACS_installation
 
-In HACS, add this as a custom repository: https://github.com/travisghansen/hass-opnsense then go to the
+In HACS, add this as a custom repository: https://github.com/11harveyj/hass-opnsense then go to the
 HACS integrations page, search for `OPNsense integration for Home Assistant` and install it. Once the
 integration is installed be sure to restart `Home Assistant`.
 
@@ -89,20 +66,23 @@ a 'hard-refresh' of the browser (ctrl-F5) then open the list again, you'll find 
   to that user. When creating the API key, `OPNsense` will push the API file containing
   the API key and API secret to your browser, you'll find it in the download folder.
 - If using a non `admin` user account ensure the user has the following privileges:
-  - `XMLRPC Library` (note that this privilege effectively gives the user complete access to
-    the system via the `xmlrpc` feature)
+  - `Diagnostics: ARP Table`
+  - `Diagnostics: NDP Table`
+  - `Diagnostics: Netstat`
+  - `Status: Traffic Graph`
   - `System:Firmware`
 
 ## config
 
-- `URL` - the full URL to your `OPNsense` UI (ie: `https://192.168.1.1`),
-  supported format is `<scheme>://<ip or host>[:<port>]`
-- `Verify SSL Certificate` - if the SSL certificate should be verified or not
+- `Host` - The FQDN or IP to your `OPNsense` installation (ie: `192.168.1.1`)
+- `Use SSL` - Use SSL to communicate with `OPNsense`
+- `Verify SSL Certificate` - If the SSL certificate should be verified or not
   (if you get an SSL error try unchecking this)
-- `username` - the API key created previously
-- `password` - the API secret of the API key
-- `Firewall Name` - a custom name to be used for `entity` naming (default: use
+- `API Key` - The API key created previously
+- `API Secret` - The API secret of the API key
+- `Firewall Name` - A custom name to be used for `entity` naming (default: use
   the `OPNsense` `hostname`)
+- `Disable SSL Warnings` - Flag that will disable all SSL warnings if set
 
 ## options
 
@@ -147,7 +127,7 @@ causing issues with the tracker. See #22 for details.
 
 ## sensor
 
-- system details (name, version, ~~temp~~, boottime, etc)
+- system details (name, version, boottime, etc)
 - pfstate details (used, max, etc)
 - cpu details (average load, frequency, etc)
 - mbuf details
@@ -156,12 +136,10 @@ causing issues with the tracker. See #22 for details.
 - interface details (status, stats, pps, kbs (time samples are based on the
   `Scan Interval (seconds)` config option))
 - gateways details (status, delay, stddev, loss)
-- carp interface status
-- ~~dhcp stats (total, online, and offline clients)~~
-- OpenVPN server stats (per-server basis - connected client count, bytes
-  sent/received, kB/s sent/received)
 
 ## switch
+
+Below has not yet been implemented in this version
 
 All of the switches below are disabled by default.
 
@@ -169,6 +147,15 @@ All of the switches below are disabled by default.
 - nat port forward rules - enable/disable rules
 - nat outbound rules - enable/disable rules
 - services - start/stop services (note that services must be enabled before they can be started)
+
+# update
+
+Update entities for:
+
+ - System
+ - Packages
+
+These are polled at the defined interval during config *10 (eg 30*10 = 300 seconds)
 
 # services
 
@@ -216,8 +203,3 @@ data:
 ```
 
 # Known Issues
-
-## AdGuardHome
-
-As mentioned [here](https://github.com/travisghansen/hass-opnsense/issues/22) using AdGuardHome can lead to problems with the plugin.
-Setting the Ratelimit in AdGuardHome to 0 will resolve this problem.
